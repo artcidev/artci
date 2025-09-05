@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Contact ICTA • My Perf by ARTCI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="app-header" role="banner">
+      <div class="container">
+        <div class="header-bar">
+          <button class="menu-btn" aria-label="Ouvrir le menu" title="Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+              <path d="M4 7H20M4 12H20M4 17H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <div class="brand-group">
+            <p class="app-brand">My Perf by ARTCI</p>
+            <p class="app-subbrand">Contact ICTA</p>
+          </div>
+        </div>
+        <h1 class="page-title">J’informe ARTCI</h1>
+      </div>
+    </header>
+
+    <main class="container" id="main" tabindex="-1">
+      <nav class="tabs" role="tablist" aria-label="Type d'abonnement">
+        <button class="tab is-active" id="tab-fixe" role="tab" aria-selected="true" aria-controls="panel-main" data-tab="fixe">Fixe</button>
+        <button class="tab" id="tab-mobile" role="tab" aria-selected="false" aria-controls="panel-main" data-tab="mobile">Mobile</button>
+      </nav>
+
+      <section id="panel-main" role="tabpanel" aria-labelledby="tab-fixe" class="panel">
+        <form id="feedbackForm" class="stack" novalidate>
+          <div class="form-row">
+            <label for="operator">Opérateur</label>
+            <!-- Native select kept for accessibility and form submission -->
+            <select id="operator" name="operator" required class="sr-only" aria-hidden="true" tabindex="-1">
+              <option value="">Sélectionner un opérateur</option>
+              <option value="operator1">Operator 1</option>
+              <option value="operator2">Operator 2</option>
+              <option value="operator3">Operator 3</option>
+              <option value="operator4">Operator 4</option>
+            </select>
+            <!-- Custom dropdown UI -->
+            <div class="select-wrap" data-target="operator">
+              <button type="button" class="select-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="operator-list">
+                <span class="select-label">Select an operator</span>
+              </button>
+              <ul id="operator-list" class="select-list" role="listbox" tabindex="-1" hidden>
+                <li class="select-option" role="option" data-value="operator1" aria-selected="false"><span class="opt-bullet" aria-hidden="true"></span><span class="opt-text">Operator 1</span></li>
+                <li class="select-option" role="option" data-value="operator2" aria-selected="false"><span class="opt-bullet" aria-hidden="true"></span><span class="opt-text">Operator 2</span></li>
+                <li class="select-option" role="option" data-value="operator3" aria-selected="false"><span class="opt-bullet" aria-hidden="true"></span><span class="opt-text">Operator 3</span></li>
+                <li class="select-option" role="option" data-value="operator4" aria-selected="false"><span class="opt-bullet" aria-hidden="true"></span><span class="opt-text">Operator 4</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <section class="ratings" aria-label="Évaluez les aspects suivants">
+            <div class="rating-card" role="group" aria-labelledby="title-call_quality">
+              <h4 id="title-call_quality" class="rating-title">Qualité des appels</h4>
+              <p class="rating-desc">Qualité de la voix lors des appels</p>
+              <div class="rating-options" data-group="call_quality">
+                <label class="rating-option type-bad">
+                  <input type="radio" name="call_quality" value="bad" />
+                  <span class="sr-only">Mauvais</span>
+                  <span class="icon icon-bad" aria-hidden="true"></span>
+                </label>
+                <label class="rating-option type-neutral">
+                  <input type="radio" name="call_quality" value="neutral" />
+                  <span class="sr-only">Moyen</span>
+                  <span class="icon icon-neutral" aria-hidden="true"></span>
+                </label>
+                <label class="rating-option type-good">
+                  <input type="radio" name="call_quality" value="good" />
+                  <span class="sr-only">Bon</span>
+                  <span class="icon icon-good" aria-hidden="true"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="rating-card" role="group" aria-labelledby="title-internet">
+              <h4 id="title-internet" class="rating-title">Internet mobile</h4>
+              <p class="rating-desc">Vitesse et stabilité de la connexion</p>
+              <div class="rating-options" data-group="internet">
+                <label class="rating-option type-bad">
+                  <input type="radio" name="internet" value="bad" />
+                  <span class="sr-only">Mauvais</span>
+                  <span class="icon icon-bad" aria-hidden="true"></span>
+                </label>
+                <label class="rating-option type-neutral">
+                  <input type="radio" name="internet" value="neutral" />
+                  <span class="sr-only">Moyen</span>
+                  <span class="icon icon-neutral" aria-hidden="true"></span>
+                </label>
+                <label class="rating-option type-good">
+                  <input type="radio" name="internet" value="good" />
+                  <span class="sr-only">Bon</span>
+                  <span class="icon icon-good" aria-hidden="true"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="rating-card" role="group" aria-labelledby="title-sms">
+              <h4 id="title-sms" class="rating-title">SMS</h4>
+              <p class="rating-desc">Réception et envoi des messages</p>
+              <div class="rating-options" data-group="sms">
+                <label class="rating-option type-bad">
+                  <input type="radio" name="sms" value="bad" />
+                  <span class="sr-only">Mauvais</span>
+                  <span class="icon icon-bad" aria-hidden="true"></span>
+                </label>
+                <label class="rating-option type-neutral">
+                  <input type="radio" name="sms" value="neutral" />
+                  <span class="sr-only">Moyen</span>
+                  <span class="icon icon-neutral" aria-hidden="true"></span>
+                </label>
+                <label class="rating-option type-good">
+                  <input type="radio" name="sms" value="good" />
+                  <span class="sr-only">Bon</span>
+                  <span class="icon icon-good" aria-hidden="true"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="rating-card" role="group" aria-labelledby="title-support">
+              <h4 id="title-support" class="rating-title">Service client</h4>
+              <p class="rating-desc">Injoignable ou attente de plus de 5 minutes</p>
+              <div class="rating-options" data-group="support">
+                <label class="rating-option type-bad">
+                  <input type="radio" name="support" value="bad" />
+                  <span class="sr-only">Mauvais</span>
+                  <span class="icon icon-bad" aria-hidden="true"></span>
+                </label>
+                <label class="rating-option type-neutral">
+                  <input type="radio" name="support" value="neutral" />
+                  <span class="sr-only">Moyen</span>
+                  <span class="icon icon-neutral" aria-hidden="true"></span>
+                </label>
+                <label class="rating-option type-good">
+                  <input type="radio" name="support" value="good" />
+                  <span class="sr-only">Bon</span>
+                  <span class="icon icon-good" aria-hidden="true"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="rating-card" role="group" aria-labelledby="title-coverage">
+              <h4 id="title-coverage" class="rating-title">Couverture réseau</h4>
+              <p class="rating-desc">Disponibilité du réseau dans votre zone</p>
+              <div class="rating-options" data-group="coverage">
+                <label class="rating-option type-bad">
+                  <input type="radio" name="coverage" value="bad" />
+                  <span class="sr-only">Mauvais</span>
+                  <span class="icon icon-bad" aria-hidden="true"></span>
+                </label>
+                <label class="rating-option type-neutral">
+                  <input type="radio" name="coverage" value="neutral" />
+                  <span class="sr-only">Moyen</span>
+                  <span class="icon icon-neutral" aria-hidden="true"></span>
+                </label>
+                <label class="rating-option type-good">
+                  <input type="radio" name="coverage" value="good" />
+                  <span class="sr-only">Bon</span>
+                  <span class="icon icon-good" aria-hidden="true"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="rating-card" role="group" aria-labelledby="title-pricing">
+              <h4 id="title-pricing" class="rating-title">Tarifs</h4>
+              <p class="rating-desc">Voix ou data</p>
+              <div class="rating-options" data-group="pricing">
+                <label class="rating-option type-bad">
+                  <input type="radio" name="pricing" value="bad" />
+                  <span class="sr-only">Mauvais</span>
+                  <span class="icon icon-bad" aria-hidden="true"></span>
+                </label>
+                <label class="rating-option type-neutral">
+                  <input type="radio" name="pricing" value="neutral" />
+                  <span class="sr-only">Moyen</span>
+                  <span class="icon icon-neutral" aria-hidden="true"></span>
+                </label>
+                <label class="rating-option type-good">
+                  <input type="radio" name="pricing" value="good" />
+                  <span class="sr-only">Bon</span>
+                  <span class="icon icon-good" aria-hidden="true"></span>
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <div class="actions">
+            <button id="sendButton" class="btn btn-primary" type="button" disabled>Envoyer l'avis</button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <dialog id="successDialog" aria-labelledby="successTitle">
+      <form method="dialog" class="dialog-content">
+        <h3 id="successTitle">Votre formulaire a été envoyé avec succès !</h3>
+        <div class="dialog-actions">
+          <button id="closeDialog" class="btn btn-primary">Terminer</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="./main.js" defer></script>
+  </body>
+</html>

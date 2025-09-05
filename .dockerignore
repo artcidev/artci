@@ -1,0 +1,29 @@
+# Exclude local/dev files from the Docker build context
+
+# VCS
+.git
+.gitignore
+
+# Python caches and virtualenvs
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.venv/
+.env
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Node or other tooling (if ever added)
+node_modules/
+
+# Large design export folder (not needed at runtime)
+figma export/
+
+# Local databases (you may mount a volume instead)
+*.db

@@ -1,0 +1,4 @@
+/.venv
+/app.db
+/figma export
+/response_example.json
