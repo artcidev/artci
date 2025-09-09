@@ -118,3 +118,22 @@ docker run --rm -p 8000:8000 \
 ### Notes
 - The container serves the static frontend from `source/` and the API at `/api/*` using `uvicorn`.
 - Default port is 8000; change the published port with `-p <host>:8000` if needed.
+
+## Tableau de bord (Analytics)
+
+Une page d’analytics moderne est disponible sur `/dashboard`.
+
+Contenu:
+- KPIs: nombre total de feedbacks, nombre d’opérateurs distincts, note moyenne pondérée, part des réponses « Bon ».
+- Graphiques:
+  - Répartition des notes (donut).
+  - Réponses par jour (30 derniers jours).
+  - Moyenne par critère (barres horizontales).
+  - Réponses par opérateur (barres).
+
+Sources de données:
+- `GET /api/analytics/summary`
+- `GET /api/analytics/criteria`
+- `GET /api/analytics/time_series?days=30`
+
+Astuce: vous pouvez ouvrir directement http://127.0.0.1:8000/dashboard

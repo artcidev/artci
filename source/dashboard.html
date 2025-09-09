@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tableau de bord — ARTCI</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    /* Dashboard additions using existing design tokens */
+    :root { --card-white: #ffffff; --card-text: #111827; }
+    .dash-container { width: min(1100px, 94%); margin-inline: auto; padding: 16px 0 28px; display: grid; gap: 16px; }
+    .dash-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .dash-title { margin: 0; font-size: 1.6rem; font-weight: 800; }
+    .dash-actions a { color: #fff; text-decoration: none; background: var(--brand); padding: 10px 14px; border-radius: 10px; font-weight: 600; }
+
+    .kpi-grid { display: grid; gap: 12px; grid-template-columns: repeat(2, 1fr); }
+    @media (min-width: 800px) { .kpi-grid { grid-template-columns: repeat(4, 1fr); } }
+    .kpi-card { background: #ffffff; box-shadow: 0 6px 18px rgba(0,0,0,.22); border-radius: 14px; padding: 14px; color: var(--card-text); display: grid; gap: 6px; }
+    .kpi-label { color: #6b7280; font-size: .9rem; }
+    .kpi-value { font-size: 1.6rem; font-weight: 800; }
+
+    .charts-grid { display: grid; gap: 16px; }
+    /* equal-height cards on first row via fixed body height */
+    .charts-grid.equal-rows { align-items: stretch; }
+    @media (min-width: 960px) { .charts-grid.equal-rows { grid-template-columns: 1.2fr 1fr; } }
+    @media (min-width: 960px) { .charts-grid { grid-template-columns: 1.2fr 1fr; align-items: start; } }
+    .chart-card { background: #ffffff; box-shadow: 0 6px 18px rgba(0,0,0,.22); border-radius: 14px; padding: 14px; color: var(--card-text); display: flex; flex-direction: column; overflow: hidden; contain: layout paint; }
+    .chart-title { margin: 0 0 10px; font-weight: 700; font-size: 1rem; color: #111827; }
+    .chart-body { position: relative; flex: 1 1 auto; min-height: 0; }
+    .chart-body-fixed { height: 260px; }
+    .chart-body canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+
+    .providers-card { background: #ffffff; box-shadow: 0 6px 18px rgba(0,0,0,.22); border-radius: 14px; padding: 14px; color: var(--card-text); }
+
+    /* Filters */
+    .filters-bar { display: grid; gap: 10px; grid-template-columns: 1fr; }
+    @media (min-width: 720px) {
+      .filters-bar { grid-template-columns: repeat(5, 1fr); align-items: end; }
+    }
+    .filters-bar .f-field { display: grid; gap: 6px; }
+    .filters-bar label { color: #374151; font-weight: 600; font-size: .9rem; }
+    .filters-bar input, .filters-bar select { padding: 10px 12px; border-radius: 10px; border: 1px solid #e5e7eb; }
+    .filters-bar .f-actions { display: flex; gap: 8px; }
+    .filters-bar .btn { background: var(--brand); color: #1f2937; font-weight: 700; border: none; border-radius: 10px; padding: 10px 14px; cursor: pointer; }
+    .filters-bar .btn.secondary { background: #e5e7eb; color: #111827; }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="container">
+      <div class="header-bar">
+        <button class="menu-btn" aria-label="Menu" title="Menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M3 6h18v2H3zM3 11h18v2H3zM3 16h18v2H3z" />
+          </svg>
+        </button>
+        <div class="brand-group">
+          <h1 class="app-brand">ARTCI</h1>
+          <p class="app-subbrand">Tableau de bord</p>
+        </div>
+      </div>
+      <h2 class="page-title">Analytique des retours</h2>
+    </div>
+  </header>
+
+  <main class="dash-container">
+    <div class="dash-header">
+      <h3 class="dash-title">Vue d’ensemble</h3>
+      <div class="dash-actions">
+        <a href="/" aria-label="Retour à l’accueil">Retour à l’accueil</a>
+      </div>
+    </div>
+
+    <section class="filters-bar" aria-label="Filtres et segmentations">
+      <div class="f-field">
+        <label for="f-start">Début</label>
+        <input id="f-start" type="date" />
+      </div>
+      <div class="f-field">
+        <label for="f-end">Fin</label>
+        <input id="f-end" type="date" />
+      </div>
+      <div class="f-field">
+        <label for="f-type">Type</label>
+        <select id="f-type">
+          <option value="">Tous</option>
+          <option value="fixe">Fixe</option>
+          <option value="mobile">Mobile</option>
+        </select>
+      </div>
+      <div class="f-field">
+        <label for="f-provider">Opérateur</label>
+        <select id="f-provider">
+          <option value="">Tous</option>
+        </select>
+      </div>
+      <div class="f-actions">
+        <button id="f-apply" class="btn" type="button">Appliquer</button>
+        <button id="f-reset" class="btn secondary" type="button">Réinitialiser</button>
+      </div>
+    </section>
+
+    <section class="kpi-grid" aria-label="Indicateurs clés">
+      <article class="kpi-card" aria-live="polite">
+        <div class="kpi-label">Feedbacks</div>
+        <div id="kpi-total" class="kpi-value">—</div>
+      </article>
+      <article class="kpi-card" aria-live="polite">
+        <div class="kpi-label">Opérateurs distincts</div>
+        <div id="kpi-providers" class="kpi-value">—</div>
+      </article>
+      <article class="kpi-card" aria-live="polite">
+        <div class="kpi-label">Note moyenne (toutes rubriques)</div>
+        <div id="kpi-avg" class="kpi-value">—</div>
+      </article>
+      <article class="kpi-card" aria-live="polite">
+        <div class="kpi-label">Part de réponses « Bon »</div>
+        <div id="kpi-good-share" class="kpi-value">—</div>
+      </article>
+    </section>
+
+    <section class="charts-grid equal-rows">
+      <div class="chart-card">
+        <h4 class="chart-title">Répartition des notes</h4>
+        <div class="chart-body chart-body-fixed">
+          <canvas id="chart-distribution"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h4 class="chart-title">Réponses par jour (30 derniers jours)</h4>
+        <div class="chart-body chart-body-fixed">
+          <canvas id="chart-timeseries"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <section class="charts-grid">
+      <div class="chart-card">
+        <h4 class="chart-title">Moyenne par critère</h4>
+        <canvas id="chart-criteria" height="240"></canvas>
+      </div>
+      <div class="providers-card">
+        <h4 class="chart-title">Réponses par opérateur</h4>
+        <canvas id="chart-providers" height="240"></canvas>
+      </div>
+    </section>
+
+    <section class="charts-grid">
+      <div class="chart-card">
+        <h4 class="chart-title">Heatmap jour/heure de soumission</h4>
+        <div class="chart-body chart-body-fixed">
+          <canvas id="chart-heatmap"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h4 class="chart-title">Évolution moyenne par critère</h4>
+        <div class="chart-body chart-body-fixed">
+          <canvas id="chart-criteria-lines"></canvas>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1/dist/chartjs-chart-matrix.min.js"></script>
+  <script src="/dashboard.js" type="module"></script>
+</body>
+</html>
