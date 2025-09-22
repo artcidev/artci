@@ -206,13 +206,14 @@
       const group = input.closest('.rating-options');
       if (group && label) {
         group.querySelectorAll('.rating-option').forEach(opt => {
-          opt.classList.remove('is-selected', 'is-bad', 'is-neutral', 'is-good');
+          opt.classList.remove('is-selected', 'is-bad', 'is-neutral', 'is-good', 'is-verygood');
         });
         label.classList.add('is-selected');
         // Also mark type for color-coded icons without :has
         if (label.classList.contains('type-bad')) label.classList.add('is-bad');
         else if (label.classList.contains('type-neutral')) label.classList.add('is-neutral');
         else if (label.classList.contains('type-good')) label.classList.add('is-good');
+        else if (label.classList.contains('type-verygood')) label.classList.add('is-verygood');
       }
       updateSendState();
     }
@@ -238,12 +239,13 @@
       if (!checked) return;
       const label = fs.querySelector('.rating-title')?.textContent?.trim() || '';
       const sublabel = fs.querySelector('.rating-desc')?.textContent?.trim() || '';
-      // bad=1, neutral=2, good=3
+      // bad=1, neutral=2, good=3, verygood=4
       const labelEl = checked.closest('label');
       let ratingNum = '';
       if (labelEl?.classList.contains('type-bad')) ratingNum = '1';
       else if (labelEl?.classList.contains('type-neutral')) ratingNum = '2';
       else if (labelEl?.classList.contains('type-good')) ratingNum = '3';
+      else if (labelEl?.classList.contains('type-verygood')) ratingNum = '4';
       if (!ratingNum) return;
       const key = `crit-${idx++}`;
       ratingsArr.push({ [key]: { label, sublabel, rating: ratingNum } });
@@ -279,7 +281,7 @@
       form.reset();
       // Clear visual selection fallbacks
       form.querySelectorAll('.rating-option').forEach(opt => {
-        opt.classList.remove('is-selected', 'is-bad', 'is-neutral', 'is-good');
+        opt.classList.remove('is-selected', 'is-bad', 'is-neutral', 'is-good', 'is-verygood');
       });
       updateSendState();
       // Reset active tab to Fixe

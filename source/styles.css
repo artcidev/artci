@@ -9,6 +9,7 @@ html, body { height: 100%; }
   --brand: #FB8521;         /* Figma brand */
   --brand-600: #E57212;     /* darker brand */
   --ok: #22c55e;            /* green-500 */
+  --great: #16a34a;         /* green-600 for very good */
   --warn: #f97316;          /* orange-500 */
   --bad: #ef4444;           /* red-500 */
   --card: #111827;          /* gray-900 */
@@ -244,10 +245,12 @@ select:required:invalid { color: var(--muted); }
 .rating-option.type-bad:has(input:checked) .icon { background-color: var(--bad); }
 .rating-option.type-neutral:has(input:checked) .icon { background-color: var(--warn); }
 .rating-option.type-good:has(input:checked) .icon { background-color: var(--ok); }
+.rating-option.type-verygood:has(input:checked) .icon { background-color: var(--great); }
 /* Fallback for browsers without :has support (toggled via JS) */
 .rating-option.is-selected.is-bad .icon { background-color: var(--bad); }
 .rating-option.is-selected.is-neutral .icon { background-color: var(--warn); }
 .rating-option.is-selected.is-good .icon { background-color: var(--ok); }
+.rating-option.is-selected.is-verygood .icon { transform: scale(1.05); }
 
 /* Icon masks (new SVGs) */
 .rating-option .icon {
@@ -261,6 +264,7 @@ select:required:invalid { color: var(--muted); }
 .icon-bad { -webkit-mask-image: url("images/cu-smiley-bad.svg"); mask-image: url("images/cu-smiley-bad.svg"); }
 .icon-neutral { -webkit-mask-image: url("images/cu-smiley-neutre.svg"); mask-image: url("images/cu-smiley-neutre.svg"); }
 .icon-good { -webkit-mask-image: url("images/cu-smiley-good.svg"); mask-image: url("images/cu-smiley-good.svg"); }
+.icon-verygood { -webkit-mask-image: url("images/cu-smiley-very-good.svg"); mask-image: url("images/cu-smiley-very-good.svg"); }
 .rating-option input { position: absolute; opacity: 0; pointer-events: none; }
 
 /* Fallback via JS: when masks unsupported, <html> gets .no-mask */
@@ -271,6 +275,26 @@ html.no-mask .rating-option .icon {
 html.no-mask .rating-option .icon.icon-bad { background-image: url("images/cu-smiley-bad.svg"); }
 html.no-mask .rating-option .icon.icon-neutral { background-image: url("images/cu-smiley-neutre.svg"); }
 html.no-mask .rating-option .icon.icon-good { background-image: url("images/cu-smiley-good.svg"); }
+html.no-mask .rating-option .icon.icon-verygood { background-image: url("images/cu-smiley-very-good.svg"); }
+
+/* Tabs styling */
+.tabs { display: inline-flex; gap: 8px; background: transparent; padding: 4px; border-radius: 12px; }
+.tab {
+  appearance: none;
+  background: #ffffff;
+  color: var(--brand-600);
+  border: 2px solid var(--brand);
+  padding: 10px 16px;
+  font-weight: 700;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.tab[aria-selected="true"], .tab.is-active {
+  background: var(--brand);
+  color: #1f2937; /* dark text on brand per your theme */
+  border-color: var(--brand);
+}
+.tab:focus-visible { outline: var(--focus); outline-offset: 2px; }
 
 /* Actions */
 .actions { display: flex; justify-content: center; padding: 8px 0 20px; }

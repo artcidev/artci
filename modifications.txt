@@ -1,0 +1,32 @@
+mets à jour le section select operateur, 
+pour l'option mobile, le liste de select sera :ORANGE, MTN, MOOV.
+pour l'option fixe: ORANGE, MTN, MOOV, GVA, CI DATA, VIPNET, KONNECT AFRICA, DATACONNECT.
+pour l'option CiPerf, permet d'evaluer l'application donc le select n'apparait pas.
+
+pour chaque option selectionner voici les sections ratings:
+mobile:
+- Disponibilité du service 
+- Qualité d’appel voix 
+- Envoi/réception SMS 
+- Disponibilité de l’Internet 
+- Vitesse de navigation web  
+- Qualité lecture video 
+- Consommation de crédit ou forfait 
+- Disponibilité/Qualité du SAV 
+
+fixe:
+- Disponibilité du réseau 
+- Qualité d’appel voix 
+- Disponibilité de l’Internet 
+- Vitesse de navigation web  
+- Qualité lecture video 
+- Disponibilité/Qualité du SAV 
+
+pour CiPerf:
+- Facilité d’installation 
+- Facilité d’utilisation 
+- Design graphique 
+- Satisfaction  
+
+ensuite ajoute une zone de texte pour les suggestions/observations/commentaires 
+et une zone pour uploader/envoyer un document juste avant le bouton envoyer

@@ -75,7 +75,7 @@ def _iter_rating_items(ratings: List[Dict[str, Any]]):
             try:
                 label = (val.get("label") or "").strip()
                 rating_str = (val.get("rating") or "").strip()
-                if not label or rating_str not in {"1", "2", "3"}:
+                if not label or rating_str not in {"1", "2", "3", "4"}:
                     continue
                 yield label, int(rating_str)
             except Exception:
@@ -138,7 +138,7 @@ def analytics_summary(
         "total_feedback": total_fb,
         "by_type": dict(by_type),
         "by_provider": dict(by_provider),
-        "rating_distribution": {k: dist.get(k, 0) for k in ["1", "2", "3"]},
+        "rating_distribution": {k: dist.get(k, 0) for k in ["1", "2", "3", "4"]},
     }
 
 
@@ -171,7 +171,7 @@ def analytics_criteria(
             "label": label,
             "count": c,
             "avg": round(avg, 2),
-            "distribution": {k: dist[label].get(k, 0) for k in ["1", "2", "3"]},
+            "distribution": {k: dist[label].get(k, 0) for k in ["1", "2", "3", "4"]},
         })
     return result
 

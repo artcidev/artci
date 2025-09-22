@@ -123,9 +123,9 @@
       const weighted = avgs.reduce((acc, v, i) => acc + v * (weights[i] || 0), 0);
       overallAvg = totalWeights ? (weighted / totalWeights) : 0;
     }
-    const dist = summary.rating_distribution || { '1': 0, '2': 0, '3': 0 };
-    const distTotal = safeNum(dist['1']) + safeNum(dist['2']) + safeNum(dist['3']);
-    const goodShare = distTotal ? Math.round((safeNum(dist['3']) / distTotal) * 100) : 0;
+    const dist = summary.rating_distribution || { '1': 0, '2': 0, '3': 0, '4': 0 };
+    const distTotal = safeNum(dist['1']) + safeNum(dist['2']) + safeNum(dist['3']) + safeNum(dist['4']);
+    const goodShare = distTotal ? Math.round(((safeNum(dist['3']) + safeNum(dist['4'])) / distTotal) * 100) : 0;
 
     document.getElementById('kpi-total').textContent = String(total);
     document.getElementById('kpi-providers').textContent = String(providersCount);
@@ -139,10 +139,10 @@
       charts.distribution = new Chart(distCtx, {
         type: 'doughnut',
         data: {
-          labels: ['Mauvais (1)', 'Moyen (2)', 'Bon (3)'],
+          labels: ['Mauvais (1)', 'Moyen (2)', 'Bon (3)', 'Très bon (4)'],
           datasets: [{
-            data: [safeNum(dist['1']), safeNum(dist['2']), safeNum(dist['3'])],
-            backgroundColor: [colors.bad, colors.warn, colors.ok],
+            data: [safeNum(dist['1']), safeNum(dist['2']), safeNum(dist['3']), safeNum(dist['4'])],
+            backgroundColor: [colors.bad, colors.warn, colors.ok, colors.teal],
             borderWidth: 0,
           }],
         },
@@ -174,8 +174,8 @@
       destroyChart('criteria');
       charts.criteria = new Chart(critCtx, {
         type: 'bar',
-        data: { labels, datasets: [{ label: 'Moyenne (1-3)', data, backgroundColor: colors.purple }] },
-        options: { indexAxis: 'y', scales: { x: { suggestedMin: 1, suggestedMax: 3, ticks: { stepSize: 0.5 } } }, plugins: { legend: { display: false } } },
+        data: { labels, datasets: [{ label: 'Moyenne (1-4)', data, backgroundColor: colors.purple }] },
+        options: { indexAxis: 'y', scales: { x: { suggestedMin: 1, suggestedMax: 4, ticks: { stepSize: 0.5 } } }, plugins: { legend: { display: false } } },
       });
     }
 
@@ -274,7 +274,7 @@
           responsive: false,
           maintainAspectRatio: false,
           animation: false,
-          scales: { y: { suggestedMin: 1, suggestedMax: 3, ticks: { stepSize: 0.5 } } },
+          scales: { y: { suggestedMin: 1, suggestedMax: 4, ticks: { stepSize: 0.5 } } },
           plugins: { legend: { position: 'bottom' } },
         },
       });
