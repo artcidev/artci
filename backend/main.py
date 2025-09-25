@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from collections import Counter, defaultdict
 from typing import List, Dict, Any, Optional
 
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from starlette.responses import FileResponse
@@ -36,10 +36,14 @@ def health() -> Dict[str, str]:
 @app.post("/api/feedback", response_model=schemas.FeedbackOut)
 def create_feedback(payload: schemas.FeedbackIn, db: Session = Depends(get_db)):
     data = payload.model_dump()  # ensure primitive types for JSON storage
+    ratings = list(data.get("ratings") or [])
+    meta = {"comments": data.get("comments") or "", "attachment": data.get("attachment") or ""}
+    if meta["comments"] or meta["attachment"]:
+        ratings.append({"_meta": meta})
     fb = models.Feedback(
         type=data["type"],
         provider=data["provider"],
-        ratings=data["ratings"],  # stored as JSON/JSONB
+        ratings=ratings,  # stored as JSON/JSONB
     )
     db.add(fb)
     db.commit()
@@ -292,8 +296,11 @@ def analytics_criteria_over_time(
 
 
 # Serve the built/static UI from / (source directory)
-STATIC_DIR = os.path.join(os.path.dirname(__file__), "..", "source")
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+STATIC_DIR = os.path.join(BASE_DIR, "source")
 STATIC_DIR = os.path.abspath(STATIC_DIR)
+UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # Register explicit pages BEFORE mounting the catch-all static route
 # (so /dashboard is not shadowed by the StaticFiles mount at "/").
@@ -305,6 +312,20 @@ def index_html():
 @app.get("/dashboard")
 def dashboard_html():
     return FileResponse(os.path.join(STATIC_DIR, "dashboard.html"))
+
+
+@app.post("/api/upload")
+async def upload(file: UploadFile = File(...)) -> Dict[str, str]:
+    # Save to uploads directory with a timestamped name
+    orig = file.filename or "upload.bin"
+    ts = datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
+    safe_name = "".join(c for c in orig if c.isalnum() or c in (".", "-", "_")) or "file"
+    name = f"{ts}_{safe_name}"
+    path = os.path.join(UPLOAD_DIR, name)
+    content = await file.read()
+    with open(path, "wb") as f:
+        f.write(content)
+    return {"filename": name, "url": f"/uploads/{name}"}
 
 @app.get("/a-propos-android")
 def dashboard_html():
@@ -331,4 +352,5 @@ def dashboard_html():
     return FileResponse(os.path.join(STATIC_DIR, "politique-cookies.html"))
     
 # Finally, mount static catch-all at /
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")

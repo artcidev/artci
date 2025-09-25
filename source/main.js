@@ -2,6 +2,7 @@
   const tabs = Array.from(document.querySelectorAll('.tab'));
   const panel = document.getElementById('panel-main');
   const operator = document.getElementById('operator');
+  const operatorRow = document.getElementById('operator-row');
   const form = document.getElementById('feedbackForm');
   const sendButton = document.getElementById('sendButton');
   const successDialog = document.getElementById('successDialog');
@@ -17,6 +18,113 @@
   }
 
   // Helpers
+  const PROVIDERS = {
+    mobile: ['ORANGE', 'MTN', 'MOOV'],
+    fixe: ['ORANGE', 'MTN', 'MOOV', 'GVA', 'CI DATA', 'VIPNET', 'KONNECT AFRICA', 'DATACONNECT'],
+    ciperf: [],
+  };
+
+  const CRITERIA = {
+    mobile: [
+      'Disponibilité du service',
+      'Qualité d’appel voix',
+      'Envoi/réception SMS',
+      'Disponibilité de l’Internet',
+      'Vitesse de navigation web',
+      'Qualité lecture video',
+      'Consommation de crédit ou forfait',
+      'Disponibilité/Qualité du SAV',
+    ],
+    fixe: [
+      'Disponibilité du réseau',
+      'Qualité d’appel voix',
+      'Disponibilité de l’Internet',
+      'Vitesse de navigation web',
+      'Qualité lecture video',
+      'Disponibilité/Qualité du SAV',
+    ],
+    ciperf: [
+      'Facilité d’installation',
+      'Facilité d’utilisation',
+      'Design graphique',
+      'Satisfaction',
+    ],
+  };
+
+  function activeTabKey() {
+    return (document.querySelector('.tab.is-active')?.dataset.tab) || 'fixe';
+  }
+
+  function sanitizeName(s) {
+    return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  }
+
+  function renderRatingsForTab(tabKey) {
+    const container = form.querySelector('section.ratings');
+    if (!container) return;
+    container.innerHTML = '';
+    const list = CRITERIA[tabKey] || [];
+    list.forEach((labelText) => {
+      const group = sanitizeName(labelText) || `crit_${Math.random().toString(36).slice(2,7)}`;
+      const card = document.createElement('div');
+      card.className = 'rating-card';
+      card.setAttribute('role', 'group');
+      card.setAttribute('aria-labelledby', `title-${group}`);
+      card.innerHTML = `
+        <h4 id="title-${group}" class="rating-title">${labelText}</h4>
+        <p class="rating-desc"></p>
+        <div class="rating-options" data-group="${group}">
+          <label class="rating-option type-bad">
+            <input type="radio" name="${group}" value="bad" />
+            <span class="sr-only">Mauvais</span>
+            <span class="icon icon-bad" aria-hidden="true"></span>
+          </label>
+          <label class="rating-option type-neutral">
+            <input type="radio" name="${group}" value="neutral" />
+            <span class="sr-only">Moyen</span>
+            <span class="icon icon-neutral" aria-hidden="true"></span>
+          </label>
+          <label class="rating-option type-good">
+            <input type="radio" name="${group}" value="good" />
+            <span class="sr-only">Bon</span>
+            <span class="icon icon-good" aria-hidden="true"></span>
+          </label>
+          <label class="rating-option type-verygood">
+            <input type="radio" name="${group}" value="verygood" />
+            <span class="sr-only">Très bon</span>
+            <span class="icon icon-verygood" aria-hidden="true"></span>
+          </label>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function populateProviders(tabKey) {
+    const options = PROVIDERS[tabKey] || [];
+    // Show/hide operator row
+    const isCiPerf = tabKey === 'ciperf';
+    if (operatorRow) operatorRow.style.display = isCiPerf ? 'none' : '';
+    if (!operator) return;
+    operator.required = !isCiPerf;
+    operator.innerHTML = '';
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = 'Sélectionner un opérateur';
+    operator.appendChild(placeholder);
+    options.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v; opt.textContent = v;
+      operator.appendChild(opt);
+    });
+    // Update custom dropdown as well
+    const wrap = document.querySelector('.select-wrap[data-target="operator"]');
+    if (wrap && typeof wrap._setOptions === 'function') {
+      wrap._setOptions(options);
+    }
+  }
+
   function getSelectedRatings() {
     const groups = Array.from(form.querySelectorAll('.rating-options'));
     const result = {};
@@ -31,7 +139,8 @@
   }
 
   function isFormReady() {
-    const operatorChosen = !!operator.value;
+    const tab = activeTabKey();
+    const operatorChosen = tab === 'ciperf' ? true : !!operator.value;
     const ratings = getSelectedRatings();
     const atLeastOneRating = Object.keys(ratings).length > 0;
     return operatorChosen && atLeastOneRating;
@@ -52,7 +161,18 @@
       tab.classList.add('is-active');
       tab.setAttribute('aria-selected', 'true');
       panel.setAttribute('aria-labelledby', tab.id);
-      // Optionally, switch content per tab here if needed.
+      // Switch operator options and ratings per tab
+      const key = tab.dataset.tab;
+      populateProviders(key);
+      renderRatingsForTab(key);
+      // Clear previous selections
+      form.querySelectorAll('.rating-option').forEach(opt => {
+        opt.classList.remove('is-selected', 'is-bad', 'is-neutral', 'is-good', 'is-verygood');
+      });
+      // Reset custom dropdown label when switching tabs
+      const wrap = document.querySelector('.select-wrap[data-target="operator"]');
+      if (wrap && typeof wrap._reset === 'function') wrap._reset();
+      updateSendState();
     });
   });
 
@@ -68,7 +188,7 @@
     const trigger = selectWrap.querySelector('.select-trigger');
     const list = selectWrap.querySelector('.select-list');
     const labelEl = trigger.querySelector('.select-label');
-    const options = Array.from(selectWrap.querySelectorAll('.select-option'));
+    let options = Array.from(selectWrap.querySelectorAll('.select-option'));
     const operatorLabel = document.querySelector('label[for="operator"]');
 
     // Make options focusable for keyboard nav
@@ -82,9 +202,31 @@
       });
     }
 
+    function logoPathForValue(v) {
+      if (!v) return '';
+      const key = v.toLowerCase().replace(/\s+/g, '_');
+      return `/images/operators/${key}.png`;
+    }
+
+    function updateTriggerLogo(value) {
+      const imgEl = trigger.querySelector('img.select-logo');
+      if (!imgEl) return;
+      if (!value) {
+        imgEl.style.display = 'none';
+        imgEl.removeAttribute('src');
+        return;
+      }
+      const src = logoPathForValue(value);
+      imgEl.style.display = 'none';
+      imgEl.src = src;
+      imgEl.onload = () => { imgEl.style.display = 'inline-block'; };
+      imgEl.onerror = () => { imgEl.style.display = 'none'; };
+    }
+
     function setValue(value, text) {
       native.value = value;
       labelEl.textContent = text;
+      updateTriggerLogo(value);
       setSelectedByValue(value);
       native.dispatchEvent(new Event('change', { bubbles: true }));
     }
@@ -159,14 +301,59 @@
       }
     }
 
+    function attachOptionHandlers() {
+      options.forEach((opt, i) => {
+        opt.addEventListener('click', onOptionClick);
+        opt.addEventListener('focus', () => { activeIndex = i; });
+      });
+    }
+
+    // Allow updating options dynamically (e.g. when switching tabs)
+    function setOptions(values) {
+      // Rebuild list DOM
+      list.innerHTML = '';
+      values.forEach(v => {
+        const li = document.createElement('li');
+        li.className = 'select-option';
+        li.setAttribute('role', 'option');
+        li.dataset.value = v;
+        li.setAttribute('aria-selected', 'false');
+        // Bullet (radio-like)
+        const bullet = document.createElement('span');
+        bullet.className = 'opt-bullet';
+        bullet.setAttribute('aria-hidden', 'true');
+        // Optional logo
+        const img = document.createElement('img');
+        img.className = 'opt-logo';
+        img.alt = '';
+        const src = logoPathForValue(v);
+        img.style.display = 'none';
+        img.src = src;
+        img.onload = () => { img.style.display = 'inline-block'; };
+        img.onerror = () => { img.style.display = 'none'; };
+        // Text
+        const text = document.createElement('span');
+        text.className = 'opt-text';
+        text.textContent = v;
+        // Assemble
+        li.appendChild(bullet);
+        li.appendChild(img);
+        li.appendChild(text);
+        list.appendChild(li);
+      });
+      options = Array.from(selectWrap.querySelectorAll('.select-option'));
+      // Make options focusable for keyboard nav
+      options.forEach((opt) => opt.setAttribute('tabindex', '-1'));
+      // Reset selection and label
+      setValue('', 'Select an operator');
+      attachOptionHandlers();
+    }
+
     // Events
     trigger.addEventListener('click', toggleList);
     trigger.addEventListener('keydown', onTriggerKey);
     list.addEventListener('keydown', onListKey);
-    options.forEach((opt, i) => {
-      opt.addEventListener('click', onOptionClick);
-      opt.addEventListener('focus', () => { activeIndex = i; });
-    });
+    attachOptionHandlers();
     document.addEventListener('click', onDocClick);
 
     // Label clicks move focus to trigger and label association for SR
@@ -186,15 +373,17 @@
       if (found) setValue(pre, found.querySelector('.opt-text').textContent.trim());
     }
 
-    // Expose reset for dialog close handler
+    // Expose reset and setOptions for external updates
     function resetCustomSelect() {
       labelEl.textContent = 'Select an operator';
       setSelectedByValue('');
       activeIndex = -1;
       closeList();
+      updateTriggerLogo('');
     }
     // Attach to wrap for external use
     selectWrap._reset = resetCustomSelect;
+    selectWrap._setOptions = setOptions;
   }
   initCustomSelect();
 
@@ -225,10 +414,9 @@
 
     // Build payload following response_example.json shape
     const activeTab = (document.querySelector('.tab.is-active')?.dataset.tab) || 'fixe';
-    // Provider label from custom select label or native select option text
-    const providerLabel = document.querySelector('.select-wrap .select-label')?.textContent?.trim();
-    const nativeProvider = operator.options[operator.selectedIndex]?.text?.trim();
-    const provider = providerLabel && providerLabel !== 'Select an operator' ? providerLabel : (nativeProvider || '');
+    // Provider from native select (custom UI hidden). For CiPerf, provider is empty.
+    const nativeProvider = operator?.options?.[operator.selectedIndex]?.text?.trim() || '';
+    const provider = activeTab === 'ciperf' ? '' : nativeProvider;
 
     // Map ratings from DOM: each .rating-card is a criterion
     const fieldsets = Array.from(form.querySelectorAll('.rating-card'));
@@ -251,10 +439,31 @@
       ratingsArr.push({ [key]: { label, sublabel, rating: ratingNum } });
     });
 
+    const comments = document.getElementById('comments')?.value?.trim() || '';
+    const attachmentInput = document.getElementById('attachment');
+    let attachmentName = '';
+    if (attachmentInput && attachmentInput.files && attachmentInput.files[0]) {
+      try {
+        const fd = new FormData();
+        fd.append('file', attachmentInput.files[0]);
+        const up = await fetch('/api/upload', { method: 'POST', body: fd });
+        if (up.ok) {
+          const j = await up.json();
+          attachmentName = j.filename || attachmentInput.files[0].name;
+        } else {
+          console.warn('Upload failed with HTTP', up.status);
+        }
+      } catch (e) {
+        console.warn('Upload error', e);
+      }
+    }
+
     const payload = {
       type: activeTab,
       provider,
       ratings: ratingsArr,
+      comments,
+      attachment: attachmentName,
     };
 
     try {
@@ -291,12 +500,16 @@
         t.setAttribute('aria-selected', t === fixe ? 'true' : 'false');
       });
       panel.setAttribute('aria-labelledby', 'tab-fixe');
-      // Reset custom operator dropdown UI if present
-      const wrap = document.querySelector('.select-wrap[data-target="operator"]');
-      if (wrap && typeof wrap._reset === 'function') wrap._reset();
+      // Re-render UI for fixe
+      populateProviders('fixe');
+      renderRatingsForTab('fixe');
+      const wrap2 = document.querySelector('.select-wrap[data-target="operator"]');
+      if (wrap2 && typeof wrap2._reset === 'function') wrap2._reset();
     }, 0);
   });
 
   // Initial state
+  populateProviders('fixe');
+  renderRatingsForTab('fixe');
   updateSendState();
 })();

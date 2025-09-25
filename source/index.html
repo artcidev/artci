@@ -34,26 +34,27 @@
 
       <section id="panel-main" role="tabpanel" aria-labelledby="tab-fixe" class="panel">
         <form id="feedbackForm" class="stack" novalidate>
-          <div class="form-row">
+          <div class="form-row" id="operator-row">
             <label for="operator">Opérateur</label>
             <!-- Native select kept for accessibility and form submission -->
             <select id="operator" name="operator" required class="sr-only" aria-hidden="true" tabindex="-1">
               <option value="">Sélectionner un opérateur</option>
-              <option value="operator1">Operator 1</option>
-              <option value="operator2">Operator 2</option>
-              <option value="operator3">Operator 3</option>
-              <option value="operator4">Operator 4</option>
+              <option value="ORANGE">ORANGE</option>
+              <option value="MTN">MTN</option>
+              <option value="MOOV">MOOV</option>
             </select>
             <!-- Custom dropdown UI -->
             <div class="select-wrap" data-target="operator">
               <button type="button" class="select-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="operator-list">
-                <span class="select-label">Select an operator</span>
+                <span class="select-left">
+                  <img class="select-logo" alt="" />
+                  <span class="select-label">Select an operator</span>
+                </span>
               </button>
               <ul id="operator-list" class="select-list" role="listbox" tabindex="-1" hidden>
-                <li class="select-option" role="option" data-value="operator1" aria-selected="false"><span class="opt-bullet" aria-hidden="true"></span><span class="opt-text">Operator 1</span></li>
-                <li class="select-option" role="option" data-value="operator2" aria-selected="false"><span class="opt-bullet" aria-hidden="true"></span><span class="opt-text">Operator 2</span></li>
-                <li class="select-option" role="option" data-value="operator3" aria-selected="false"><span class="opt-bullet" aria-hidden="true"></span><span class="opt-text">Operator 3</span></li>
-                <li class="select-option" role="option" data-value="operator4" aria-selected="false"><span class="opt-bullet" aria-hidden="true"></span><span class="opt-text">Operator 4</span></li>
+                <li class="select-option" role="option" data-value="ORANGE" aria-selected="false"><span class="opt-bullet" aria-hidden="true"></span><span class="opt-text">ORANGE</span></li>
+                <li class="select-option" role="option" data-value="MTN" aria-selected="false"><span class="opt-bullet" aria-hidden="true"></span><span class="opt-text">MTN</span></li>
+                <li class="select-option" role="option" data-value="MOOV" aria-selected="false"><span class="opt-bullet" aria-hidden="true"></span><span class="opt-text">MOOV</span></li>
               </ul>
             </div>
           </div>
@@ -221,6 +222,16 @@
               </div>
             </div>
           </section>
+
+          <div class="form-row">
+            <label for="comments">Suggestions / Observations / Commentaires</label>
+            <textarea id="comments" name="comments" rows="4" placeholder="Votre message..."></textarea>
+          </div>
+
+          <div class="form-row">
+            <label for="attachment">Ajouter un document (optionnel)</label>
+            <input id="attachment" name="attachment" type="file" />
+          </div>
 
           <div class="actions">
             <button id="sendButton" class="btn btn-primary" type="button" disabled>Envoyer l'avis</button>
