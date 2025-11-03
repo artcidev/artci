@@ -302,6 +302,15 @@ STATIC_DIR = os.path.abspath(STATIC_DIR)
 UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+# Serve favicon from /images even when browser requests /favicon.ico at root
+FAVICON_PATH = os.path.join(STATIC_DIR, "images", "favicon.ico")
+
+@app.get("/favicon.ico")
+def favicon():
+    if os.path.exists(FAVICON_PATH):
+        return FileResponse(FAVICON_PATH)
+    raise HTTPException(status_code=404, detail="favicon not found")
+
 # Register explicit pages BEFORE mounting the catch-all static route
 # (so /dashboard is not shadowed by the StaticFiles mount at "/").
 @app.get("/index.html")
