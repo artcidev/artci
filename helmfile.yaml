@@ -1,0 +1,22 @@
+environments:
+  default:
+    values:
+      - environments/default.yaml
+  dev:
+    values:
+      - environments/default.yaml
+      - environments/dev.yaml
+  prod:
+    values:
+      - environments/default.yaml
+      - environments/prod.yaml
+
+releases:
+  - name: artci
+    chart: ./chart/artci
+    namespace: artci
+    # Create namespace if it doesn't exist (requires helm-diff plugin usually, or --create-namespace flag)
+    # Helmfile handles this via `helm upgrade --install --create-namespace`
+    values:
+      - environments/default.yaml
+      - {{ .Values | toYaml | nindent 8 }}

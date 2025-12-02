@@ -1,0 +1,5 @@
+replicaCount: 1
+postgresql:
+  enabled: true
+ingress:
+  enabled: true

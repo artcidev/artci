@@ -1,0 +1,8 @@
+# Production specific overrides
+# ingress:
+#   className: nginx
+#   hosts:
+#     - host: artci.com
+#       paths:
+#         - path: /
+#           pathType: Prefix
