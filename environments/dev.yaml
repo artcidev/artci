@@ -6,12 +6,15 @@ image:
 ingress:
   className: public
   hosts:
-    - host: artci.local
+    - host: artci.cloudyapp.net
       paths:
         - path: /
           pathType: Prefix
 
 # In dev, we might want to expose Postgres via NodePort or just use the ClusterIP
 postgresql:
+  image:
+    repository: bitnamilegacy/postgresql
+    tag: "16.6.0-debian-12-r2"
   auth:
     password: "devpassword"

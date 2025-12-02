@@ -119,6 +119,39 @@ docker run --rm -p 8000:8000 \
 - The container serves the static frontend from `source/` and the API at `/api/*` using `uvicorn`.
 - Default port is 8000; change the published port with `-p <host>:8000` if needed.
 
+## Kubernetes Deployment (MicroK8s)
+
+### Prerequisites
+- MicroK8s enabled with `dns`, `registry`, `ingress`, `storage`.
+- Helm and Helmfile installed.
+
+### Deploy
+1. Build and push the image to the local registry:
+   ```bash
+   docker build -t localhost:32000/artci:latest .
+   docker push localhost:32000/artci:latest
+   ```
+2. Deploy using Helmfile:
+   ```bash
+   helmfile -e dev apply
+   ```
+
+### Accessing the Application
+
+**Option 1: Ingress (Recommended)**
+1. Add the following line to your `/etc/hosts` (Linux/Mac) or `C:\Windows\System32\drivers\etc\hosts` (Windows):
+   ```text
+   127.0.0.1 artci.local
+   ```
+2. Open your browser at [http://artci.local](http://artci.local).
+
+**Option 2: Port Forwarding**
+If Ingress is not working or you want quick access:
+```bash
+microk8s kubectl port-forward svc/artci 8080:80 -n artci
+```
+Then open [http://localhost:8080](http://localhost:8080).
+
 ## Tableau de bord (Analytics)
 
 Une page d’analytics moderne est disponible sur `/dashboard`.
