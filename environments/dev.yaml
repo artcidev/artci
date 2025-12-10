@@ -19,6 +19,11 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
+  tls:
+    - secretName: artci-tls
+      hosts:
+        - app.artci.ci
+        - jinforme.artci.ci
 
 # In dev, we might want to expose Postgres via NodePort or just use the ClusterIP
 postgresql:
