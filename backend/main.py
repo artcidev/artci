@@ -359,7 +359,13 @@ def dashboard_html():
 @app.get("/politique-cookies")
 def dashboard_html():
     return FileResponse(os.path.join(STATIC_DIR, "politique-cookies.html"))
-    
+
+@app.get("/ci-perf")
+def ci_perf_page():
+    response = FileResponse(os.path.join(STATIC_DIR, "ci-perf.html"))
+    response.headers["X-Frame-Options"] = "ALLOWALL"
+    return response
+
 # Finally, mount static catch-all at /
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test de vitesse Internet - ARTCI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+  <style>
+    /* Page-specific styles aligned with global theme */
+    .speed-test-header {
+      text-align: center;
+      color: var(--text);
+      margin-bottom: 24px;
+      padding-top: 20px;
+    }
+
+    .speed-test-header h1 {
+      font-size: 1.875rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--brand);
+    }
+
+    .speed-test-header p {
+      font-size: 1rem;
+      color: var(--muted);
+    }
+
+    .speed-test-card {
+      background: white;
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+
+    .iframe-container {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    iframe {
+      border: none;
+      width: 100%;
+      height: 500px;
+      display: block;
+    }
+
+    /* Modal aligned with global style */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 32px;
+      border-radius: 14px;
+      max-width: 450px;
+      width: 90%;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+      animation: scaleIn 0.3s ease;
+    }
+
+    .modal-content h2 {
+      margin-top: 0;
+      color: var(--brand);
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .modal-content .subtitle {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+    }
+
+    .modal-content label {
+      display: block;
+      margin: 16px 0 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .modal-content select,
+    .modal-content input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1.5px solid var(--brand);
+      border-radius: 12px;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+      background: white;
+    }
+
+    .modal-content select:focus,
+    .modal-content input:focus {
+      outline: none;
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 20%, transparent);
+    }
+
+    .modal-content button {
+      margin-top: 24px;
+      width: 100%;
+      padding: 12px;
+      background: var(--brand);
+      color: #1f2937;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 700;
+      transition: background 0.2s ease;
+    }
+
+    .modal-content button:hover {
+      background: var(--brand-600);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .speed-test-header h1 {
+        font-size: 1.5rem;
+      }
+
+      .speed-test-card {
+        padding: 16px;
+      }
+
+      iframe {
+        height: 400px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Modal -->
+  <div class="modal" id="userModal">
+    <div class="modal-content">
+      <h2>Bienvenue !</h2>
+      <p class="subtitle">Avant de commencer le test, renseignez votre secteur d'activité</p>
+
+      <label for="sector">Secteur d'activité</label>
+      <select id="sector">
+        <option value="">-- Sélectionnez --</option>
+        <option value="IT">Informatique</option>
+        <option value="Finance">Finance</option>
+        <option value="Education">Éducation</option>
+        <option value="Santé">Santé</option>
+        <option value="Autre">Autre</option>
+      </select>
+
+      <div id="otherSectorDiv" style="display:none;">
+        <label for="otherSector">Précisez</label>
+        <input type="text" id="otherSector" placeholder="Votre secteur...">
+      </div>
+
+      <button onclick="submitUserInfo()">Commencer le test</button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="container">
+    <div class="speed-test-header">
+      <h1>Test de vitesse Internet</h1>
+      <p>Mesurez la performance de votre connexion</p>
+    </div>
+
+    <div class="speed-test-card">
+      <div class="iframe-container">
+        <iframe id="nPerfSpeedTest" src="https://ws.nperf.com/partner/frame?l=b488404b-14cb-4fdb-8ca7-7c59815934ef"
+          allow="geolocation" referrerpolicy="unsafe-url">
+        </iframe>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Modal display on load
+    window.addEventListener("load", function () {
+      document.getElementById("userModal").style.display = "flex";
+    });
+
+    // Show/hide "other sector" field
+    document.getElementById("sector").addEventListener("change", function () {
+      const otherDiv = document.getElementById("otherSectorDiv");
+      otherDiv.style.display = this.value === "Autre" ? "block" : "none";
+    });
+
+    // Submit user info
+    function submitUserInfo() {
+      const sector = document.getElementById("sector").value;
+      const other = document.getElementById("otherSector").value;
+      const chosenSector = sector === "Autre" ? other : sector;
+
+      if (!chosenSector) {
+        alert("Veuillez sélectionner ou saisir un secteur.");
+        return;
+      }
+
+      // You can send this to your backend here
+      console.log("Secteur choisi:", chosenSector);
+
+      // Close modal
+      document.getElementById("userModal").style.display = "none";
+    }
+
+    // nPerf callback functions (simplified - just logging)
+    const ALLOWED_ORIGINS = [
+      "https://ws.nperf.com",
+      "https://ws-cdn.nperf.com",
+      "http://ws-nossl.nperf.com"
+    ];
+
+    function log(msg) {
+      console.log("[nPerf]", msg);
+    }
+
+    function nPerfLoaded() { log("Iframe chargé"); }
+    function nPerfReady() { log("Test prêt"); }
+    function nPerfError(type) { log("Erreur: " + type); }
+    function nPerfTestStarted() { log("Test démarré"); }
+    function nPerfTestCompletedObj(obj) {
+      log("Test terminé");
+      console.log("Résultats:", obj);
+      // You can send results to your backend here
+    }
+    function nPerfGetLastResult(lastResult) {
+      log("Dernier résultat récupéré");
+      console.log("Dernier résultat:", lastResult);
+      // You can send results to your backend here
+    }
+    function nPerfGetRealTimeUpdate(data) {
+      log("Mise à jour en temps réel");
+    }
+
+    // Message listener for nPerf callbacks
+    window.addEventListener("message", function (event) {
+      if (!ALLOWED_ORIGINS.includes(event.origin)) return;
+      const data = event.data;
+      if (!data || !data.action) return;
+
+      try {
+        if (data.action === "nPerfLoaded") nPerfLoaded();
+        else if (data.action === "nPerfReady") nPerfReady();
+        else if (data.action === "nPerfError") nPerfError(data.type);
+        else if (data.action === "nPerfTestStarted") nPerfTestStarted();
+        else if (data.action === "nPerfTestCompleted") nPerfTestCompletedObj(data);
+        else if (data.action === "nPerfGetLastResult") nPerfGetLastResult(data.lastResult);
+        else if (data.action === "nPerfGetRealTimeUpdate") nPerfGetRealTimeUpdate(data);
+      } catch (e) {
+        log("Erreur callback: " + e);
+      }
+    }, false);
+  </script>
+</body>
+
+</html>

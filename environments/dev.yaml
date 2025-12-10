@@ -6,7 +6,7 @@ image:
 ingress:
   className: public
   hosts:
-    - host: artci.cloudyapp.net
+    - host: app.artci.ci
       paths:
         - path: /
           pathType: Prefix
