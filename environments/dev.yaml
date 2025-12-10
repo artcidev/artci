@@ -4,9 +4,18 @@ image:
   pullPolicy: Always
 
 ingress:
+  enabled: true
   className: public
+  annotations:
+    kubernetes.io/ingress.class: public
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
   hosts:
     - host: app.artci.ci
+      paths:
+        - path: /
+          pathType: Prefix
+    - host: jinforme.artci.ci
       paths:
         - path: /
           pathType: Prefix
