@@ -66,7 +66,7 @@
     container.innerHTML = '';
     const list = CRITERIA[tabKey] || [];
     list.forEach((labelText) => {
-      const group = sanitizeName(labelText) || `crit_${Math.random().toString(36).slice(2,7)}`;
+      const group = sanitizeName(labelText) || `crit_${Math.random().toString(36).slice(2, 7)}`;
       const card = document.createElement('div');
       card.className = 'rating-card';
       card.setAttribute('role', 'group');
@@ -458,12 +458,19 @@
       }
     }
 
+    // URL Params Extraction
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlUuid = urlParams.get('uuid') || null;
+    const urlContext = urlParams.get('context') ? decodeURIComponent(urlParams.get('context')) : null;
+
     const payload = {
       type: activeTab,
       provider,
       ratings: ratingsArr,
       comments,
       attachment: attachmentName,
+      nperf_test_id: urlUuid,
+      sector: urlContext
     };
 
     try {

@@ -8,8 +8,18 @@ class NPerfWidget {
         this.url_path = "https://ws.nperf.com";
         this.iframeUrl = this.url_path + "/partner/frame?l=b488404b-14cb-4fdb-8ca7-7c59815934ef";
 
-        // Initialize userSector from localStorage
-        this.userSector = localStorage.getItem('nperf_user_sector') || "";
+        // Initialize userSector from localStorage OR URL query params
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlContext = urlParams.get('context') ? decodeURIComponent(urlParams.get('context')) : null;
+        this.externalUuid = urlParams.get('uuid') || null;
+        this.urlSector = urlContext;
+
+        if (this.urlSector) {
+            console.log("[NPerfWidget] Sector initialized from URL:", this.urlSector);
+            this.userSector = this.urlSector;
+        } else {
+            this.userSector = localStorage.getItem('nperf_user_sector') || "";
+        }
 
         // CSS matching ci-perf.html + new dropdown styles
         this.styles = `
@@ -275,11 +285,11 @@ class NPerfWidget {
                 </div>
 
                 <div class="nperf-other-input-wrap">
-                    <label for="nperf-other-detail" style="margin-top:0;">Précisez votre secteur</label>
+                    <label for="nperf-other-detail" style="margin-top:0;">Commentaire</label>
                     <input type="text" id="nperf-other-detail" class="nperf-other-input" placeholder="Ex: Consommateur, Entreprise...">
                 </div>
                 
-                <button class="nperf-btn-submit">CONTINUER</button>
+                <button class="nperf-btn-submit">CONTINUER</button> 
             </div>
         `;
 
@@ -477,7 +487,30 @@ class NPerfWidget {
     processResult(data) {
         console.log("Processing Result with Sector:", this.userSector);
         data.userSector = this.userSector;
-        // Logic to send data to backend or display final confirmation
+
+        // Prepare API Payload
+        const payload = {
+            nperf_test_id: data.resultId || data.id || (data.result ? data.result.id : null) || "".toString(),
+            external_uuid: data.device.uuid,
+            sector: this.userSector
+        };
+
+        // Attempt to find ID in varying nPerf structures if top-level helper failed
+        if ((!payload.nperf_test_id) && data.result && data.result.id) {
+            payload.nperf_test_id = data.result.id;
+        }
+
+        console.log("Sending API Payload:", payload);
+
+        // Send to Backend
+        fetch('/api/nperf/results', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).then(res => {
+            if (res.ok) console.log("Result saved to backend.");
+            else console.warn("Failed to save result to backend.");
+        }).catch(err => console.error("Error saving result:", err));
     }
 
     onGetLastResult(lastResult) {

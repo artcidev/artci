@@ -15,6 +15,8 @@ class FeedbackIn(BaseModel):
     ratings: List[Dict[str, Any]]
     comments: Optional[str] = ""
     attachment: Optional[str] = ""
+    nperf_test_id: Optional[str] = None
+    sector: Optional[str] = None
 
 
 class FeedbackOut(BaseModel):
@@ -22,6 +24,26 @@ class FeedbackOut(BaseModel):
     type: str
     provider: str
     ratings: List[Dict[str, Any]]  # keep as-is to mirror input
+    created_at: datetime
+    nperf_test_id: Optional[str] = None
+    sector: Optional[str] = None
+
+    model_config = {
+        "from_attributes": True
+    }
+
+
+class NPerfResultIn(BaseModel):
+    nperf_test_id: Optional[str] = None
+    external_uuid: Optional[str] = None
+    sector: str
+
+
+class NPerfResultOut(BaseModel):
+    id: int
+    nperf_test_id: Optional[str]
+    external_uuid: Optional[str]
+    sector: Optional[str]
     created_at: datetime
 
     model_config = {

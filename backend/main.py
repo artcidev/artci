@@ -36,19 +36,55 @@ def health() -> Dict[str, str]:
 @app.post("/api/feedback", response_model=schemas.FeedbackOut)
 def create_feedback(payload: schemas.FeedbackIn, db: Session = Depends(get_db)):
     data = payload.model_dump()  # ensure primitive types for JSON storage
+    # Extract ratings and meta if needed, but since we have new columns, let's just map them.
+    # The 'ratings' column expects the list of dicts.
+    # We want to pass everything that matches the model.
+    
+    # We can handle the ratings/meta processing if still needed for the 'ratings' column structure.
+    # The original code appended meta to ratings list. We should preserve that behavior if it's important for analytics.
     ratings = list(data.get("ratings") or [])
     meta = {"comments": data.get("comments") or "", "attachment": data.get("attachment") or ""}
     if meta["comments"] or meta["attachment"]:
         ratings.append({"_meta": meta})
+    
+    # Update data['ratings'] with the modified list
+    data['ratings'] = ratings
+    
+    # Now create the object using unpacking. 
+    # Warning: payload.model_dump() includes 'comments'/'attachment' which are NOT in models.Feedback (unless I added them, which I didn't verify if I should have). 
+    # Ah, I added 'comments' in my previous edit to models.py? 
+    # Let me check my thought process... I said "I will also add comments column". 
+    # Wait, in the actual tool call for models.py (Step 161), I DID add `comments = Column(String, nullable=True)`.
+    # So 'comments' IS in the model now. 
+    # 'attachment' was NOT added to the model in Step 161.
+    # So if I pass 'attachment' to Feedback(**data), it will crash if using **data directly.
+    
+    # Safest bet: Explicit mapping for safety + preservation of original logic.
     fb = models.Feedback(
         type=data["type"],
         provider=data["provider"],
         ratings=ratings,  # stored as JSON/JSONB
+        comments=data.get("comments"), # Now exists in model
+        nperf_test_id=data.get("nperf_test_id"),
+        sector=data.get("sector")
     )
     db.add(fb)
     db.commit()
     db.refresh(fb)
-    return schemas.FeedbackOut.from_orm(fb)
+    return fb # Return the db object, Pydantic handles serialization
+
+
+@app.post("/api/nperf/results", response_model=schemas.NPerfResultOut)
+def create_nperf_result(payload: schemas.NPerfResultIn, db: Session = Depends(get_db)):
+    db_obj = models.NPerfResult(
+        nperf_test_id=payload.nperf_test_id,
+        external_uuid=payload.external_uuid,
+        sector=payload.sector
+    )
+    db.add(db_obj)
+    db.commit()
+    db.refresh(db_obj)
+    return db_obj
 
 
 @app.get("/api/feedback", response_model=List[schemas.FeedbackOut])
