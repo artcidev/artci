@@ -170,3 +170,9 @@ Sources de données:
 - `GET /api/analytics/time_series?days=30`
 
 Astuce: vous pouvez ouvrir directement http://127.0.0.1:8000/dashboard
+
+# JS Delivery
+
+```html
+<script src="https://cdn.jsdelivr.net/gh/artcidev/artci@latest/source/script-nperf.js"></script>
+```

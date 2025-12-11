@@ -7,7 +7,9 @@ class NPerfWidget {
         this.target = options.target || document.body;
         this.url_path = "https://ws.nperf.com";
         this.iframeUrl = this.url_path + "/partner/frame?l=b488404b-14cb-4fdb-8ca7-7c59815934ef";
-        this.userSector = "";
+
+        // Initialize userSector from localStorage
+        this.userSector = localStorage.getItem('nperf_user_sector') || "";
 
         // CSS matching ci-perf.html + new dropdown styles
         this.styles = `
@@ -156,6 +158,29 @@ class NPerfWidget {
                 font-size: 0.95rem;
             }
 
+            .nperf-other-input-wrap {
+                margin-top: 16px;
+                display: none;
+                text-align: left;
+                animation: nperfFadeIn 0.3s ease;
+            }
+            .nperf-other-input-wrap.visible {
+                display: block;
+            }
+            .nperf-other-input {
+                width: 100%;
+                padding: 12px 16px;
+                border: 1.5px solid #FB8521;
+                border-radius: 12px;
+                font-size: 15px;
+                box-sizing: border-box;
+                font-family: inherit;
+            }
+            .nperf-other-input:focus {
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(251, 133, 33, 0.2);
+            }
+
             .nperf-btn-submit {
                 margin-top: 24px;
                 width: 100%;
@@ -193,7 +218,7 @@ class NPerfWidget {
         this.createModal();
         this.renderIframe();
         this.bindEvents();
-        this.showModal();
+        // Do NOT show modal on init anymore
     }
 
     injectStyles() {
@@ -220,6 +245,7 @@ class NPerfWidget {
             "Secteur Santé",
             "Secteur Education",
             "Presse / Médias",
+            "Artci",
             "Autres"
         ];
 
@@ -247,6 +273,11 @@ class NPerfWidget {
                         ${optionsHtml}
                     </ul>
                 </div>
+
+                <div class="nperf-other-input-wrap">
+                    <label for="nperf-other-detail" style="margin-top:0;">Précisez votre secteur</label>
+                    <input type="text" id="nperf-other-detail" class="nperf-other-input" placeholder="Ex: Consommateur, Entreprise...">
+                </div>
                 
                 <button class="nperf-btn-submit">CONTINUER</button>
             </div>
@@ -260,6 +291,8 @@ class NPerfWidget {
         this.submitBtn = this.modal.querySelector('.nperf-btn-submit');
         this.labelSpan = this.modal.querySelector('.nperf-select-label');
         this.optionsEls = this.modal.querySelectorAll('.nperf-select-option');
+        this.otherInputWrap = this.modal.querySelector('.nperf-other-input-wrap');
+        this.otherInput = this.modal.querySelector('#nperf-other-detail');
 
         // Bind interactions
         this.triggerBtn.addEventListener('click', (e) => {
@@ -310,10 +343,18 @@ class NPerfWidget {
         optionEl.classList.add('selected');
 
         const value = optionEl.getAttribute('data-value');
-        this.userSector = value;
+        this.tempUserSector = value; // Store temporarily
 
         // Update label
         this.labelSpan.textContent = value;
+
+        // Show/Hide Other Input
+        if (value === "Autres") {
+            this.otherInputWrap.classList.add('visible');
+            setTimeout(() => this.otherInput.focus(), 100);
+        } else {
+            this.otherInputWrap.classList.remove('visible');
+        }
 
         this.closeDropdown();
     }
@@ -327,14 +368,36 @@ class NPerfWidget {
     }
 
     handleSubmit() {
-        if (!this.userSector) {
+        if (!this.tempUserSector) {
             alert("Veuillez sélectionner un secteur.");
             return;
         }
 
-        console.log("Secteur choisi:", this.userSector);
+        let finalSector = this.tempUserSector;
+
+        // Use "Other" detail if applicable
+        if (this.tempUserSector === "Autres") {
+            const detail = this.otherInput.value.trim();
+            if (!detail) {
+                alert("Veuillez préciser votre secteur.");
+                this.otherInput.focus();
+                return;
+            }
+            finalSector = "Autres: " + detail;
+        }
+
+        // Persist choice
+        this.userSector = finalSector;
+        localStorage.setItem('nperf_user_sector', this.userSector);
+
+        console.log("Secteur choisi et sauvegardé:", this.userSector);
         this.hideModal();
-        // Here we can start the test or pass the data
+
+        // Process the pending result if available
+        if (this.pendingResultData) {
+            this.processResult(this.pendingResultData);
+            this.pendingResultData = null; // Clear
+        }
     }
 
     renderIframe() {
@@ -376,6 +439,8 @@ class NPerfWidget {
             const data = event.data;
             if (!data || !data.action) return;
 
+            console.log("[NPerfWidget] Received action", data.action);
+
             // Route events
             switch (data.action) {
                 case "nPerfLoaded": this.onLoaded(); break;
@@ -397,15 +462,28 @@ class NPerfWidget {
     onTestStarted() { console.log("[NPerfWidget] Started"); }
 
     onTestCompleted(data) {
-        console.log("[NPerfWidget] Completed", data);
+        console.log("[NPerfWidget] Test Completed (Raw)", data);
+
         if (this.userSector) {
-            console.log("Result for sector:", this.userSector);
-            data.userSector = this.userSector;
+            // User already has a sector, process immediately
+            this.processResult(data);
+        } else {
+            // No sector, hold result and ask user
+            this.pendingResultData = data;
+            this.showModal();
         }
+    }
+
+    processResult(data) {
+        console.log("Processing Result with Sector:", this.userSector);
+        data.userSector = this.userSector;
+        // Logic to send data to backend or display final confirmation
     }
 
     onGetLastResult(lastResult) {
         console.log("[NPerfWidget] Last Result", lastResult);
+
+        this.onTestCompleted(lastResult);
     }
 
     onResponsiveSwitch(data) {
