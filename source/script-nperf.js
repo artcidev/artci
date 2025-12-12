@@ -503,7 +503,7 @@ class NPerfWidget {
         console.log("Sending API Payload:", payload);
 
         // Send to Backend
-        fetch('/api/nperf/results', {
+        fetch('https://app.artci.ci/api/nperf/results', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
