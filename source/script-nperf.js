@@ -15,7 +15,7 @@ class NPerfWidget {
         this.urlSector = urlContext;
 
         if (this.urlSector) {
-            console.log("[NPerfWidget] Sector initialized from URL:", this.urlSector);
+            // console.log("[NPerfWidget] Sector initialized from URL:", this.urlSector);
             this.userSector = this.urlSector;
         } else {
             this.userSector = localStorage.getItem('nperf_user_sector') || "";
@@ -218,17 +218,102 @@ class NPerfWidget {
                 from { opacity: 0; transform: scale(0.95); }
                 to { opacity: 1; transform: scale(1); }
             }
+
+            /* Profile Footer Styles */
+            .nperf-profile-footer {
+                margin-top: 12px;
+                padding: 12px 16px;
+                background: #F9FAFB;
+                border: 1px solid #E5E7EB;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                font-family: 'Roboto', sans-serif;
+                color: #374151;
+                font-size: 0.95rem;
+                animation: nperfFadeIn 0.4s ease;
+            }
+            .nperf-footer-content strong {
+                color: #FB8521;
+                font-weight: 600;
+            }
+            .nperf-edit-btn {
+                background: white;
+                border: 1px solid #D1D5DB;
+                border-radius: 8px;
+                cursor: pointer;
+                padding: 6px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #6B7280;
+                transition: all 0.2s;
+            }
+            .nperf-edit-btn:hover {
+                border-color: #FB8521;
+                color: #FB8521;
+                box-shadow: 0 2px 5px rgba(251, 133, 33, 0.15);
+            }
+            .nperf-edit-btn svg {
+                width: 16px;
+                height: 16px;
+                fill: currentColor;
+            }
         `;
 
         this.init();
     }
 
     init() {
+        console.log("NPerfWidget v1.0.0 loaded");
         this.injectStyles();
         this.createModal();
         this.renderIframe();
+        // Render footer immediately (shows "Non défini" if empty)
+        this.renderProfileFooter();
+
         this.bindEvents();
         // Do NOT show modal on init anymore
+    }
+
+    renderProfileFooter() {
+        let container = typeof this.target === 'string' ? document.querySelector(this.target) : this.target;
+        if (!container) return;
+
+        // Remove existing footer if any
+        const existingFooter = container.querySelector('.nperf-profile-footer');
+        if (existingFooter) {
+            existingFooter.remove();
+        }
+
+        // Always show footer now, even if no sector
+        // if (!this.userSector) return; 
+
+        const displaySector = this.userSector || "Non défini";
+        const footerTitle = this.userSector ? "Modifier le profil" : "Définir le profil";
+
+        const footer = document.createElement('div');
+        footer.className = 'nperf-profile-footer';
+        footer.innerHTML = `
+            <div class="nperf-footer-content">
+                Secteur / Profil : <strong>${displaySector}</strong>
+            </div>
+            <button class="nperf-edit-btn" title="${footerTitle}">
+                <!-- Pencil Icon -->
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                </svg>
+            </button>
+        `;
+
+        // Bind Edit Click
+        const editBtn = footer.querySelector('.nperf-edit-btn');
+        editBtn.addEventListener('click', () => {
+            this.showModal();
+        });
+
+        container.appendChild(footer);
     }
 
     injectStyles() {
@@ -268,7 +353,11 @@ class NPerfWidget {
 
         // Content
         this.modal.innerHTML = `
-            <div class="nperf-modal-content">
+            <div class="nperf-modal-content" style="position: relative;">
+                <button class="nperf-close-btn" title="Fermer">
+                    <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                </button>
+                
                 <img src="https://nperf.com/favicon.ico" style="width: 48px; margin-bottom: 16px; display:none;"> 
                 <!-- Header Icon could be added here if needed like in design -->
                 
@@ -303,8 +392,20 @@ class NPerfWidget {
         this.optionsEls = this.modal.querySelectorAll('.nperf-select-option');
         this.otherInputWrap = this.modal.querySelector('.nperf-other-input-wrap');
         this.otherInput = this.modal.querySelector('#nperf-other-detail');
+        this.closeBtn = this.modal.querySelector('.nperf-close-btn');
 
         // Bind interactions
+        this.closeBtn.addEventListener('click', () => {
+            this.hideModal();
+        });
+
+        // Close when clicking strictly on the backdrop (outside modal content)
+        this.modal.addEventListener('click', (e) => {
+            if (e.target === this.modal) {
+                this.hideModal();
+            }
+        });
+
         this.triggerBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             this.toggleDropdown();
@@ -319,7 +420,7 @@ class NPerfWidget {
 
         this.submitBtn.addEventListener('click', () => this.handleSubmit());
 
-        // Close on click outside
+        // Close dropdown on click outside
         document.addEventListener('click', (e) => {
             if (!this.triggerBtn.contains(e.target) && !this.dropdownList.contains(e.target)) {
                 this.closeDropdown();
@@ -407,7 +508,11 @@ class NPerfWidget {
             localStorage.setItem('nperf_user_sector', this.userSector);
         }
 
-        console.log("Secteur choisi:", this.userSector);
+        // console.log("Secteur choisi:", this.userSector);
+
+        // Update the footer to reflect new choice
+        this.renderProfileFooter();
+
         this.hideModal();
 
         // Process the pending result if available
@@ -456,7 +561,7 @@ class NPerfWidget {
             const data = event.data;
             if (!data || !data.action) return;
 
-            console.log("[NPerfWidget] Received action", data.action);
+            // console.log("[NPerfWidget] Received action", data.action);
 
             // Route events
             switch (data.action) {
@@ -473,13 +578,13 @@ class NPerfWidget {
 
     // --- Event Handlers Stub ---
 
-    onLoaded() { console.log("[NPerfWidget] Loaded"); }
-    onReady() { console.log("[NPerfWidget] Ready"); }
+    onLoaded() { /* console.log("[NPerfWidget] Loaded"); */ }
+    onReady() { /* console.log("[NPerfWidget] Ready"); */ }
     onError(type) { console.warn("[NPerfWidget] Error:", type); }
-    onTestStarted() { console.log("[NPerfWidget] Started"); }
+    onTestStarted() { /* console.log("[NPerfWidget] Started"); */ }
 
     onTestCompleted(data) {
-        console.log("[NPerfWidget] Test Completed (Raw)", data);
+        // console.log("[NPerfWidget] Test Completed (Raw)", data);
 
         if (this.userSector) {
             // User already has a sector, process immediately
@@ -492,7 +597,7 @@ class NPerfWidget {
     }
 
     processResult(data) {
-        console.log("Processing Result with Sector:", this.userSector);
+        // console.log("Processing Result with Sector:", this.userSector);
         data.userSector = this.userSector;
 
         // Prepare API Payload
@@ -507,7 +612,7 @@ class NPerfWidget {
             payload.nperf_test_id = data.result.id;
         }
 
-        console.log("Sending API Payload:", payload);
+        // console.log("Sending API Payload:", payload);
 
         // Send to Backend
         fetch('https://app.artci.ci/api/nperf/results', {
@@ -515,13 +620,13 @@ class NPerfWidget {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         }).then(res => {
-            if (res.ok) console.log("Result saved to backend.");
+            if (res.ok) { /* console.log("Result saved to backend."); */ }
             else console.warn("Failed to save result to backend.");
         }).catch(err => console.error("Error saving result:", err));
     }
 
     onGetLastResult(lastResult) {
-        console.log("[NPerfWidget] Last Result", lastResult);
+        // console.log("[NPerfWidget] Last Result", lastResult);
 
         this.onTestCompleted(lastResult);
     }
