@@ -396,11 +396,18 @@ class NPerfWidget {
             finalSector = "Autres: " + detail;
         }
 
-        // Persist choice
+        // Persist choice logic:
+        // If "Autres", do NOT save (remove existing) so it asks again next time.
+        // Otherwise, save to skip dialog in future.
         this.userSector = finalSector;
-        localStorage.setItem('nperf_user_sector', this.userSector);
 
-        console.log("Secteur choisi et sauvegardé:", this.userSector);
+        if (this.userSector.startsWith("Autres")) {
+            localStorage.removeItem('nperf_user_sector');
+        } else {
+            localStorage.setItem('nperf_user_sector', this.userSector);
+        }
+
+        console.log("Secteur choisi:", this.userSector);
         this.hideModal();
 
         // Process the pending result if available

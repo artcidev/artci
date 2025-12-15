@@ -171,8 +171,42 @@ Sources de données:
 
 Astuce: vous pouvez ouvrir directement http://127.0.0.1:8000/dashboard
 
+
 # JS Delivery
 
 ```html
 <script src="https://cdn.jsdelivr.net/gh/artcidev/artci@latest/source/script-nperf.js"></script>
 ```
+
+## Intégration du Widget
+
+Pour intégrer le widget de test de débit sur votre site :
+
+1.  **Ajouter le script** :
+    Incluez le script via le CDN dans votre `<head>` ou à la fin du `<body>`.
+
+2.  **Conteneur HTML** :
+    Ajoutez une `div` vide là où vous souhaitez afficher le test.
+    ```html
+    <div id="nperf-test-container"></div>
+    ```
+
+3.  **Initialisation du Widget** :
+    Une fois la page chargée, initialisez le widget en ciblant l'ID du conteneur.
+    ```html
+    <script>
+      window.addEventListener('load', () => {
+         // Initialisation
+         new NPerfWidget({
+            target: '#nperf-test-container'
+         });
+      });
+    </script>
+    ```
+
+4.  **Paramètres URL (Optionnel)** :
+    Vous pouvez passer des paramètres dans l'URL de la page pour pré-remplir les données ou lier à une application mobile.
+    - `context`: Le secteur ou profil (ex: `Sante`, `Education`). Si présent, la boîte de dialogue sera ignorée.
+    - `uuid`: Un identifiant unique externe pour le test (ex: `USER-123`).
+    
+    Exemple : `https://votre-site.com/page-test?context=Sante&uuid=123-ABC`
