@@ -1,12 +1,11 @@
 /**
  * NPerfWidget
  * Encapsulates the nPerf iframe and a user sector/profile dialog.
+ * Version 1.0.0
+ * Author: Beye Daouda
+ * Date: 2025-12-16
  */
 class NPerfWidget {
-    //version 1.0.0
-    //author Beye Daouda
-    //date 2025-12-16
-    //description Encapsulates the nPerf iframe and a user sector/profile dialog.
     constructor(options = {}) {
         this.target = options.target || document.body;
         this.url_path = "https://ws.nperf.com";
