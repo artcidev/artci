@@ -3,6 +3,10 @@
  * Encapsulates the nPerf iframe and a user sector/profile dialog.
  */
 class NPerfWidget {
+    //version 1.0.0
+    //author Beye Daouda
+    //date 2025-12-16
+    //description Encapsulates the nPerf iframe and a user sector/profile dialog.
     constructor(options = {}) {
         this.target = options.target || document.body;
         this.url_path = "https://ws.nperf.com";
@@ -578,7 +582,7 @@ class NPerfWidget {
 
     // --- Event Handlers Stub ---
 
-    onLoaded() { /* console.log("[NPerfWidget] Loaded"); */ }
+    onLoaded() { console.log("[NPerfWidget] Loaded Version 1.0.0"); }
     onReady() { /* console.log("[NPerfWidget] Ready"); */ }
     onError(type) { console.warn("[NPerfWidget] Error:", type); }
     onTestStarted() { /* console.log("[NPerfWidget] Started"); */ }
