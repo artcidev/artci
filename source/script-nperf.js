@@ -32,10 +32,17 @@ class NPerfWidget {
 
         // CSS matching ci-perf.html + new dropdown styles
         this.styles = `
+            /* Reset & Base */
+            .nperf-widget-reset, .nperf-widget-reset * {
+                box-sizing: border-box;
+                font-family: 'Roboto', sans-serif;
+                line-height: normal;
+            }
+
             .nperf-modal {
                 display: none;
                 position: fixed;
-                z-index: 9999;
+                z-index: 2147483647; /* Max z-index */
                 left: 0;
                 top: 0;
                 width: 100%;
@@ -45,7 +52,6 @@ class NPerfWidget {
                 justify-content: center;
                 align-items: center;
                 animation: nperfFadeIn 0.3s ease;
-                font-family: 'Roboto', sans-serif;
             }
             .nperf-modal-content {
                 background: white;
@@ -56,19 +62,54 @@ class NPerfWidget {
                 box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
                 animation: nperfScaleIn 0.3s ease;
                 text-align: center;
+                position: relative; /* Ensure absolute children are relative to this */
             }
             .nperf-modal-content h2 {
-                margin-top: 0;
-                color: #e3001b; /* nPerf Red or brand color */
+                margin-top: 20px;
+                color: #e3001b;
                 font-size: 1.5rem;
                 margin-bottom: 8px;
                 font-weight: 700;
+                line-height: 1.3;
             }
             .nperf-modal-content .subtitle {
                 color: #6b7280;
                 font-size: 0.95rem;
                 margin-bottom: 24px;
+                margin-top: 0;
+                line-height: 1.5;
             }
+            
+            /* Close Button */
+            .nperf-close-btn {
+                position: absolute;
+                top: 12px;
+                right: 12px;
+                background: #f3f4f6;
+                border: none;
+                border-radius: 50%;
+                width: 32px;
+                height: 32px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #4b5563;
+                transition: all 0.2s;
+                padding: 0;
+                z-index: 10;
+            }
+            .nperf-close-btn:hover {
+                background: #e5e7eb;
+                color: #111827;
+            }
+            .nperf-close-btn svg {
+                width: 20px;
+                height: 20px;
+                fill: currentColor;
+                display: block;
+            }
+
             .nperf-modal-content label {
                 display: block;
                 margin: 16px 0 8px;
@@ -97,26 +138,25 @@ class NPerfWidget {
                 cursor: pointer;
                 font-size: 15px;
                 transition: all 0.2s ease;
-                box-sizing: border-box;
+                min-height: 48px; /* Ensure click area */
             }
             .nperf-select-trigger:hover {
                 border-color: #E57212;
             }
             .nperf-select-label {
                 font-weight: 700;
-                color: #FB8521; /* Brand Orange text */
+                color: #FB8521;
             }
             /* Chevron */
             .nperf-select-trigger::after {
                 content: "";
-                width: 12px;
-                height: 12px;
+                width: 10px;
+                height: 10px;
                 border-right: 2px solid #FB8521;
                 border-bottom: 2px solid #FB8521;
                 transform: rotate(45deg);
                 transition: transform 0.2s ease;
                 margin-right: 4px;
-                
             }
             .nperf-select-trigger[aria-expanded="true"]::after {
                 transform: rotate(-135deg);
@@ -144,7 +184,6 @@ class NPerfWidget {
             .nperf-select-list.open {
                 display: block;
             }
-
             .nperf-select-option {
                 display: grid;
                 grid-template-columns: 20px 1fr;
@@ -154,6 +193,7 @@ class NPerfWidget {
                 border-radius: 8px;
                 cursor: pointer;
                 user-select: none;
+                margin: 0;
             }
             .nperf-select-option:hover {
                 background: rgba(251, 133, 33, .08);
@@ -167,6 +207,7 @@ class NPerfWidget {
                 background: transparent;
                 display: inline-block;
                 transition: background 0.2s;
+                flex-shrink: 0;
             }
             .nperf-select-option.selected .nperf-opt-bullet {
                 background: #FB8521;
@@ -175,6 +216,7 @@ class NPerfWidget {
                 color: #FB8521;
                 font-weight: 600;
                 font-size: 0.95rem;
+                line-height: 1.4;
             }
 
             .nperf-other-input-wrap {
@@ -194,6 +236,7 @@ class NPerfWidget {
                 font-size: 15px;
                 box-sizing: border-box;
                 font-family: inherit;
+                background: white;
             }
             .nperf-other-input:focus {
                 outline: none;
@@ -214,6 +257,10 @@ class NPerfWidget {
                 transition: background 0.2s ease;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 50px;
             }
             .nperf-btn-submit:hover {
                 background: #E57212;
@@ -242,6 +289,7 @@ class NPerfWidget {
                 color: #374151;
                 font-size: 0.95rem;
                 animation: nperfFadeIn 0.4s ease;
+                box-sizing: border-box;
             }
             .nperf-footer-content strong {
                 color: #FB8521;
@@ -258,6 +306,9 @@ class NPerfWidget {
                 justify-content: center;
                 color: #6B7280;
                 transition: all 0.2s;
+                width: 32px;
+                height: 32px;
+                box-sizing: border-box;
             }
             .nperf-edit-btn:hover {
                 border-color: #FB8521;
@@ -303,7 +354,7 @@ class NPerfWidget {
         const footerTitle = this.userSector ? "Modifier le profil" : "Définir le profil";
 
         const footer = document.createElement('div');
-        footer.className = 'nperf-profile-footer';
+        footer.className = 'nperf-profile-footer nperf-widget-reset';
         footer.innerHTML = `
             <div class="nperf-footer-content">
                 Secteur / Profil : <strong>${displaySector}</strong>
@@ -337,7 +388,7 @@ class NPerfWidget {
     createModal() {
         // Create modal container
         this.modal = document.createElement('div');
-        this.modal.className = 'nperf-modal';
+        this.modal.className = 'nperf-modal nperf-widget-reset';
         this.modal.id = 'nPerfUserModal';
 
         // Options
