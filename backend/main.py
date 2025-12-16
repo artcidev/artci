@@ -14,6 +14,10 @@ from . import models, schemas
 
 # Create tables on startup (simple bootstrap; for production prefer migrations)
 try:
+    if os.getenv("RESET_DB_ON_STARTUP", "").lower() == "true":
+        print("WARNING: RESET_DB_ON_STARTUP is true. Dropping all tables...")
+        Base.metadata.drop_all(bind=engine)
+        
     Base.metadata.create_all(bind=engine)
 except Exception as e:
     # Ignorer l'erreur si c'est une 'UniqueViolation' due à une race condition entre workers

@@ -3,6 +3,9 @@ image:
   tag: latest
   pullPolicy: Always
 
+env:
+  RESET_DB_ON_STARTUP: "true"
+
 ingress:
   enabled: true
   className: public
