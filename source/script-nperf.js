@@ -349,7 +349,7 @@ class NPerfWidget {
             "Secteur Santé",
             "Secteur Education",
             "Presse / Médias",
-            "Artci",
+            "ARTCI",
             "Autres"
         ];
 
