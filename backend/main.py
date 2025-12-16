@@ -87,6 +87,85 @@ def create_nperf_result(payload: schemas.NPerfResultIn, db: Session = Depends(ge
     return db_obj
 
 
+@app.get("/api/nperf/results", response_model=Dict[str, Any])
+def list_nperf_results(
+    page: int = 1,
+    limit: int = 50,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.NPerfResult)
+
+    if start_date:
+        try:
+            start_dt = datetime.fromisoformat(start_date)
+            query = query.filter(models.NPerfResult.created_at >= start_dt)
+        except ValueError:
+            pass
+    if end_date:
+        try:
+            end_dt = datetime.fromisoformat(end_date)
+            # inclusive end date
+            query = query.filter(models.NPerfResult.created_at <= end_dt + timedelta(days=1))
+        except ValueError:
+            pass
+
+    total = query.count()
+    
+    # Pagination
+    offset = (page - 1) * limit
+    results = query.order_by(models.NPerfResult.created_at.desc()).offset(offset).limit(limit).all()
+
+    return {
+        "items": [schemas.NPerfResultOut.from_orm(r) for r in results],
+        "total": total,
+        "page": page,
+        "limit": limit
+    }
+
+
+from sqlalchemy import text
+
+
+@app.post("/api/admin/update-schema")
+def update_schema(db: Session = Depends(get_db)):
+    """Temporary endpoint to manually update the database schema for feedbacks table"""
+    try:
+        # PostgreSQL syntax to add columns if not exists
+        # Note: SQLite does not support IF NOT EXISTS in ADD COLUMN in older versions, 
+        # but modern Postgres does.
+        # We'll use a brute-force approach with try/except blocks for broad compatibility or specific syntax.
+        
+        # Adding nperf_test_id
+        try:
+            db.execute(text("ALTER TABLE feedbacks ADD COLUMN nperf_test_id VARCHAR(255)"))
+        except Exception as e:
+            # Likely already exists
+            print(f"Column nperf_test_id might already exist: {e}")
+            db.rollback()
+
+        # Adding sector
+        try:
+            db.execute(text("ALTER TABLE feedbacks ADD COLUMN sector VARCHAR(255)"))
+        except Exception as e:
+            print(f"Column sector might already exist: {e}")
+            db.rollback()
+
+        # Adding comments
+        try:
+            db.execute(text("ALTER TABLE feedbacks ADD COLUMN comments VARCHAR"))
+        except Exception as e:
+             print(f"Column comments might already exist: {e}")
+             db.rollback()
+             
+        db.commit()
+        return {"status": "Schema update attempted"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/feedback", response_model=List[schemas.FeedbackOut])
 def list_feedback(limit: int = 50, db: Session = Depends(get_db)):
     q = db.query(models.Feedback).order_by(models.Feedback.created_at.desc()).limit(limit)

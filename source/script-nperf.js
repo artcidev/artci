@@ -8,6 +8,12 @@
 class NPerfWidget {
     constructor(options = {}) {
         this.target = options.target || document.body;
+        // Auto-detect environment
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        //const defaultApi = isLocal ? 'http://localhost:8000' : 'https://app.artci.ci';
+        const defaultApi = 'http://localhost:8000';
+        this.apiBaseUrl = options.apiUrl || defaultApi;
+
         this.url_path = "https://ws.nperf.com";
         this.iframeUrl = this.url_path + "/partner/frame?l=b488404b-14cb-4fdb-8ca7-7c59815934ef";
 
@@ -269,7 +275,7 @@ class NPerfWidget {
     }
 
     init() {
-        console.log("NPerfWidget v1.0.0 loaded");
+        console.log("NPerfWidget v1.0.2 loaded (API: " + this.apiBaseUrl + ")");
         this.injectStyles();
         this.createModal();
         this.renderIframe();
@@ -603,22 +609,23 @@ class NPerfWidget {
         // console.log("Processing Result with Sector:", this.userSector);
         data.userSector = this.userSector;
 
-        // Prepare API Payload
-        const payload = {
-            nperf_test_id: data.resultId || data.id || (data.result ? data.result.id : null) || "".toString(),
-            external_uuid: data.device.uuid,
-            sector: this.userSector
-        };
+        // Prepare API Payload with safety checks
+        const uuid = (data.device && data.device.uuid) ? data.device.uuid : (this.externalUuid || null);
+        const testId = data.resultId || data.id || (data.result ? data.result.id : null) || "";
 
-        // Attempt to find ID in varying nPerf structures if top-level helper failed
-        if ((!payload.nperf_test_id) && data.result && data.result.id) {
-            payload.nperf_test_id = data.result.id;
-        }
+        const payload = {
+            nperf_test_id: String(testId),
+            external_uuid: uuid ? String(uuid) : null,
+            sector: String(this.userSector || "")
+        };
 
         // console.log("Sending API Payload:", payload);
 
         // Send to Backend
-        fetch('https://app.artci.ci/api/nperf/results', {
+        // Use configured API URL (auto-detected or overridden)
+        const apiUrl = this.apiBaseUrl.replace(/\/$/, "") + '/api/nperf/results';
+
+        fetch(apiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
