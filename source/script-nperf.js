@@ -11,7 +11,7 @@ class NPerfWidget {
         // Auto-detect environment
         const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         //const defaultApi = isLocal ? 'http://localhost:8000' : 'https://app.artci.ci';
-        const defaultApi = 'http://localhost:8000';
+        const defaultApi = 'https://app.artci.ci';
         this.apiBaseUrl = options.apiUrl || defaultApi;
 
         this.url_path = "https://ws.nperf.com";
@@ -670,7 +670,7 @@ class NPerfWidget {
             sector: String(this.userSector || "")
         };
 
-        // console.log("Sending API Payload:", payload);
+        console.log("Sending API Payload:", payload);
 
         // Send to Backend
         // Use configured API URL (auto-detected or overridden)
