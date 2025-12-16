@@ -36,7 +36,7 @@ class FeedbackOut(BaseModel):
 class NPerfResultIn(BaseModel):
     nperf_test_id: Optional[str] = None
     external_uuid: Optional[str] = None
-    sector: str
+    sector: Optional[str] = None
 
 
 class NPerfResultOut(BaseModel):

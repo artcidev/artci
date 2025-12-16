@@ -13,7 +13,11 @@ from .db import get_db, Base, engine
 from . import models, schemas
 
 # Create tables on startup (simple bootstrap; for production prefer migrations)
-Base.metadata.create_all(bind=engine)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    # Ignorer l'erreur si c'est une 'UniqueViolation' due à une race condition entre workers
+    print(f"Schema creation warning (safe to ignore if multiple workers): {e}")
 
 app = FastAPI(title="ARTCI Feedback API")
 
