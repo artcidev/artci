@@ -1,7 +1,7 @@
 /**
  * NPerfWidget
  * Encapsulates the nPerf iframe and a user sector/profile dialog.
- * Version 1.0.0
+ * Version 1.0.2
  * Author: Beye Daouda
  * Date: 2025-12-16
  */
@@ -37,6 +37,23 @@ class NPerfWidget {
                 box-sizing: border-box !important;
                 font-family: 'Roboto', sans-serif !important;
                 line-height: normal !important;
+            }
+            
+            /* Fix FontAwesome Font Family (Must override the above !important) */
+            .nperf-widget-reset .fa-solid,
+            .nperf-widget-reset .fa-regular,
+            .nperf-widget-reset .fa-brands,
+            .nperf-widget-reset .fas,
+            .nperf-widget-reset .far,
+            .nperf-widget-reset .fab,
+            .nperf-widget-reset i {
+                font-family: "Font Awesome 6 Free" !important;
+                font-weight: 900 !important;
+                font-style: normal !important;
+                font-variant: normal !important;
+                line-height: 1 !important;
+                text-rendering: auto !important;
+                -webkit-font-smoothing: antialiased !important;
             }
 
             .nperf-modal {
@@ -103,15 +120,9 @@ class NPerfWidget {
                 background: #e5e7eb;
                 color: #111827 !important;
             }
-            .nperf-close-btn svg {
-                width: 20px !important;
-                height: 20px !important;
-                fill: #4b5563 !important; /* Force fill */
-                display: block !important;
-                min-width: 20px;
-            }
-            .nperf-close-btn:hover svg {
-                fill: #111827 !important;
+            .nperf-close-btn i {
+                font-size: 18px !important;
+                color: inherit !important;
             }
 
             .nperf-modal-content label {
@@ -153,18 +164,16 @@ class NPerfWidget {
                 color: #FB8521;
             }
             .nperf-select-trigger::after {
-                content: "";
-                width: 10px;
-                height: 10px;
-                border-right: 2px solid #FB8521;
-                border-bottom: 2px solid #FB8521;
-                transform: rotate(45deg);
+                content: "\\f078"; /* fa-chevron-down */
+                font-family: "Font Awesome 6 Free";
+                font-weight: 900;
+                color: #FB8521;
+                font-size: 12px;
                 transition: transform 0.2s ease;
                 margin-right: 4px;
             }
             .nperf-select-trigger[aria-expanded="true"]::after {
-                transform: rotate(-135deg);
-                margin-top: 4px;
+                transform: rotate(180deg);
             }
 
             .nperf-select-list {
@@ -228,6 +237,7 @@ class NPerfWidget {
                 display: none;
                 text-align: left;
                 animation: nperfFadeIn 0.3s ease;
+                width: 100%;
             }
             .nperf-other-input-wrap.visible {
                 display: block;
@@ -323,15 +333,9 @@ class NPerfWidget {
                 color: #FB8521 !important;
                 box-shadow: 0 2px 5px rgba(251, 133, 33, 0.15);
             }
-            .nperf-edit-btn svg {
-                width: 16px !important;
-                height: 16px !important;
-                fill: #6B7280 !important;
-                display: block !important;
-                min-width: 16px;
-            }
-            .nperf-edit-btn:hover svg {
-                fill: #FB8521 !important;
+            .nperf-edit-btn i {
+                font-size: 14px !important;
+                color: inherit !important;
             }
         `;
 
@@ -339,7 +343,8 @@ class NPerfWidget {
     }
 
     init() {
-        console.log("NPerfWidget v1.0.2 loaded (API: " + this.apiBaseUrl + ")");
+        console.log("NPerfWidget v1.0.3 loaded (API: " + this.apiBaseUrl + ")");
+        this.injectFontAwesome();
         this.injectStyles();
         this.createModal();
         this.renderIframe();
@@ -348,6 +353,16 @@ class NPerfWidget {
 
         this.bindEvents();
         // Do NOT show modal on init anymore
+    }
+
+    injectFontAwesome() {
+        if (!document.getElementById('nperf-fa')) {
+            const link = document.createElement('link');
+            link.id = 'nperf-fa';
+            link.rel = 'stylesheet';
+            link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
+            document.head.appendChild(link);
+        }
     }
 
     renderProfileFooter() {
@@ -373,10 +388,7 @@ class NPerfWidget {
                 Secteur / Profil : <strong>${displaySector}</strong>
             </div>
             <button class="nperf-edit-btn" title="${footerTitle}">
-                <!-- Pencil Icon -->
-                <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M8.56078 20.2501L20.5608 8.25011L15.7501 3.43945L3.75012 15.4395V20.2501H8.56078ZM15.7501 5.56077L18.4395 8.25011L16.5001 10.1895L13.8108 7.50013L15.7501 5.56077ZM12.7501 8.56079L15.4395 11.2501L7.93946 18.7501H5.25012L5.25012 16.0608L12.7501 8.56079Z" fill="#080341"/>
-                </svg>
+                <i class="fa-solid fa-pen"></i>
             </button>
         `;
 
@@ -428,9 +440,7 @@ class NPerfWidget {
         this.modal.innerHTML = `
             <div class="nperf-modal-content" style="position: relative;">
                 <button class="nperf-close-btn" title="Fermer">
-                    <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5.29289 5.29289C5.68342 4.90237 6.31658 4.90237 6.70711 5.29289L12 10.5858L17.2929 5.29289C17.6834 4.90237 18.3166 4.90237 18.7071 5.29289C19.0976 5.68342 19.0976 6.31658 18.7071 6.70711L13.4142 12L18.7071 17.2929C19.0976 17.6834 19.0976 18.3166 18.7071 18.7071C18.3166 19.0976 17.6834 19.0976 17.2929 18.7071L12 13.4142L6.70711 18.7071C6.31658 19.0976 5.68342 19.0976 5.29289 18.7071C4.90237 18.3166 4.90237 17.6834 5.29289 17.2929L10.5858 12L5.29289 6.70711C4.90237 6.31658 4.90237 5.68342 5.29289 5.29289Z" fill="#0F1729"/>
-                    </svg>
+                    <i class="fa-solid fa-xmark"></i>
                 </button>
                 
                 <img src="https://nperf.com/favicon.ico" style="width: 48px; margin-bottom: 16px; display:none;"> 
@@ -653,7 +663,7 @@ class NPerfWidget {
 
     // --- Event Handlers Stub ---
 
-    onLoaded() { console.log("[NPerfWidget] Loaded Version 1.0.0"); }
+    onLoaded() { console.log("[NPerfWidget] Loaded Version 1.0.2"); }
     onReady() { /* console.log("[NPerfWidget] Ready"); */ }
     onError(type) { console.warn("[NPerfWidget] Error:", type); }
     onTestStarted() { /* console.log("[NPerfWidget] Started"); */ }
